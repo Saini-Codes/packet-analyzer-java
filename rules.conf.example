@@ -1,0 +1,5 @@
+# Packet Analyzer Java rules
+# BLOCK_IP=192.168.1.10
+# BLOCK_PORT=443
+# BLOCK_DOMAIN=*.facebook.com
+# BLOCK_APP=NETFLIX
