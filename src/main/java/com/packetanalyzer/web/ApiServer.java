@@ -51,7 +51,8 @@ public final class ApiServer {
         if (options(ex)) return;
         Path p = Paths.get("test.pcap");
         if (!Files.exists(p)) { send(ex, 404, "{\"error\":\"test.pcap not found\"}"); return; }
-        send(ex, 200, analyzeFile(p, new RuleManager()));
+        try { send(ex, 200, analyzeFile(p, new RuleManager())); }
+        catch (Exception e) { send(ex, 400, jsonError(e.getMessage())); }
     }
 
     private static void analyze(HttpExchange ex) throws IOException {
