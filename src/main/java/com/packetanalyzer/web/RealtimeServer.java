@@ -12,6 +12,8 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -71,10 +73,12 @@ public final class RealtimeServer {
         e.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
         e.sendResponseHeaders(200, 0);
         OutputStream out = e.getResponseBody();
-        java.util.function.Consumer<String> listener = json -> {
+        AtomicReference<Consumer<String>> ref = new AtomicReference<>();
+        Consumer<String> listener = json -> {
             try { synchronized (out) { out.write(("data: " + json + "\n\n").getBytes(StandardCharsets.UTF_8)); out.flush(); } }
-            catch (IOException ignored) { capture.removeListener(null); }
+            catch (IOException ignored) { Consumer<String> current = ref.get(); if (current != null) capture.removeListener(current); }
         };
+        ref.set(listener);
         capture.addListener(listener);
         try {
             synchronized (out) { out.write("retry: 2000\n\n".getBytes(StandardCharsets.UTF_8)); out.flush(); }
